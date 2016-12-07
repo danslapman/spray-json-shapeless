@@ -21,10 +21,12 @@ object RecordFormats {
     hWriter: Lazy[JsonWriter[H]],
     tWriter: JsonWriter[T]): JsonWriter[FieldType[K, H] :: T] =
     (hl: FieldType[K, H] :: T) => {
-      JsObject(
-        JsObject(witness.value.name -> hWriter.value.write(hl.head)).fields ++
-          tWriter.write(hl.tail).asInstanceOf[JsObject].fields
-      )
+      tWriter.write(hl.tail) match {
+        case tjso: JsObject =>
+          JsObject(tjso.fields + (witness.value.name -> hWriter.value.write(hl.head)))
+        case _ =>
+          serializationError("tail serializer must return JsObject")
+      }
     }
 
   /**
