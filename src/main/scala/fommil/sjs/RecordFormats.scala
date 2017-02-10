@@ -4,6 +4,24 @@ import spray.json._
 import shapeless._
 import shapeless.labelled._
 
+trait KeyResolver {
+  def resolve(field: Symbol): String
+}
+
+/**
+ * Automatic key resolver, returs symbol `as-is`
+ */
+object AutoKeyResolver extends KeyResolver {
+  override def resolve(field: Symbol): String = field.name
+}
+
+/**
+ * Customizable key resolver, substitutes keys from provided map
+ */
+class MapBasedKeyResolver(keyMap: Map[Symbol, Symbol]) extends KeyResolver {
+  override def resolve(field: Symbol): String = keyMap.getOrElse(field, field).name
+}
+
 /**
  * Generic marshallers for extensible records
  */
@@ -19,11 +37,13 @@ object RecordFormats {
   implicit def recordWriter[K <: Symbol, H, T <: HList](implicit
     witness: Witness.Aux[K],
     hWriter: Lazy[JsonWriter[H]],
-    tWriter: JsonWriter[T]): JsonWriter[FieldType[K, H] :: T] =
+    tWriter: JsonWriter[T],
+    resolver: KeyResolver = AutoKeyResolver): JsonWriter[FieldType[K, H] :: T] =
     (hl: FieldType[K, H] :: T) => {
+      val valueName = resolver.resolve(witness.value)
       tWriter.write(hl.tail) match {
         case tjso: JsObject =>
-          JsObject(tjso.fields + (witness.value.name -> hWriter.value.write(hl.head)))
+          JsObject(tjso.fields + (valueName -> hWriter.value.write(hl.head)))
         case _ =>
           serializationError("tail serializer must return JsObject")
       }
@@ -44,9 +64,10 @@ object RecordFormats {
   implicit def recordReader[K <: Symbol, H, T <: HList](implicit
     witness: Witness.Aux[K],
     hReader: Lazy[JsonReader[H]],
-    tReader: JsonReader[T]): JsonReader[FieldType[K, H] :: T] =
+    tReader: JsonReader[T],
+    resolver: KeyResolver = AutoKeyResolver): JsonReader[FieldType[K, H] :: T] =
     (json: JsValue) => {
-      val fieldName = witness.value.name
+      val fieldName = resolver.resolve(witness.value)
       json match {
         case jso: JsObject =>
           jso.getFields(fieldName).headOption match {

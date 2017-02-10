@@ -5,6 +5,15 @@ name := "spray-json-shapeless"
 sonatypeGithub := ("fommil", "spray-json-shapeless")
 licenses := Seq(Apache2)
 
+resolvers += Resolver.bintrayRepo("tek", "maven")
+
+addCompilerPlugin("tryp" %% "splain" % "0.1.20")
+
+scalacOptions ++= Seq(
+  "-P:splain:implicits:false",
+  "-P:splain:breakinfix:1"
+)
+
 libraryDependencies ++= Seq(
   "io.spray" %% "spray-json" % "1.3.2",
   "org.slf4j" % "slf4j-api" % "1.7.21"
