@@ -39,7 +39,8 @@ object RecordFormats {
     witness: Witness.Aux[K],
     hWriter: Lazy[JsonWriter[H]],
     tWriter: JsonWriter[T],
-    resolver: KeyResolver = AutoKeyResolver): JsonWriter[FieldType[K, H] :: T] =
+    resolver: KeyResolver = AutoKeyResolver
+  ): JsonWriter[FieldType[K, H] :: T] =
     (hl: FieldType[K, H] :: T) => {
       val valueName = resolver.resolve(witness.value)
       tWriter.write(hl.tail) match {
@@ -67,7 +68,8 @@ object RecordFormats {
     witness: Witness.Aux[K],
     hReader: Lazy[JsonReader[H]],
     tReader: JsonReader[T],
-    resolver: KeyResolver = AutoKeyResolver): JsonReader[FieldType[K, H] :: T] =
+    resolver: KeyResolver = AutoKeyResolver
+  ): JsonReader[FieldType[K, H] :: T] =
     (json: JsValue) => {
       val fieldName = resolver.resolve(witness.value)
       json match {
@@ -96,7 +98,8 @@ object RecordFormats {
     witness: Witness.Aux[K],
     hFormat: Lazy[JsonFormat[H]],
     tFormat: JsonFormat[T],
-    resolver: KeyResolver = AutoKeyResolver): JsonFormat[FieldType[K, H] :: T] = new JsonFormat[FieldType[K, H] :: T] {
+    resolver: KeyResolver = AutoKeyResolver
+  ): JsonFormat[FieldType[K, H] :: T] = new JsonFormat[FieldType[K, H] :: T] {
     private val writer = recordWriter[K, H, T]
     private val reader = recordReader[K, H, T]
 
