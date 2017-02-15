@@ -1,6 +1,5 @@
 package fommil.sjs
 
-import shapeless._
 import shapeless.record._
 
 object MixedAst {
