@@ -34,7 +34,8 @@ object RecordFormats {
   /**
    * Formats HList representing extensible record
    */
-  implicit def recordWriter[K <: Symbol, H, T <: HList](implicit
+  implicit def recordWriter[K <: Symbol, H, T <: HList](
+    implicit
     witness: Witness.Aux[K],
     hWriter: Lazy[JsonWriter[H]],
     tWriter: JsonWriter[T],
@@ -61,7 +62,8 @@ object RecordFormats {
   /**
    * Extracts extensible record with given type
    */
-  implicit def recordReader[K <: Symbol, H, T <: HList](implicit
+  implicit def recordReader[K <: Symbol, H, T <: HList](
+    implicit
     witness: Witness.Aux[K],
     hReader: Lazy[JsonReader[H]],
     tReader: JsonReader[T],
@@ -89,7 +91,8 @@ object RecordFormats {
     override def read(json: JsValue): HNil = hNilReader.read(json)
   }
 
-  implicit def recordFormat[K <: Symbol, H, T <: HList](implicit
+  implicit def recordFormat[K <: Symbol, H, T <: HList](
+    implicit
     witness: Witness.Aux[K],
     hFormat: Lazy[JsonFormat[H]],
     tFormat: JsonFormat[T],
